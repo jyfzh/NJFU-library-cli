@@ -42,27 +42,17 @@ impl Config {
     }
 }
 
-pub async fn save_config_to_file(config: &Config) -> Result<Resp> {
+pub fn save_config_to_file(config: &Config) -> Result<()> {
     let root = home_dir().ok_or(ClientError::Config)?;
     let path = root.join(def::CONFIG_FILE);
-
-    let mut config = config.clone();
-    if config.user.is_none() {
-        let user = search_user_info(&config).await?;
-        config.user = Some(user);
-    }
 
     let mut output = File::create(path)?;
     let info = serde_json::to_string_pretty(&config)?;
     write!(output, "{}", info)?;
-    Ok(Resp::new(
-        0,
-        "save cookie success".to_string(),
-        Some(vec![Data::Config(config.clone())]),
-    ))
+    Ok(())
 }
 
-pub fn load_config_from_file() -> Result<Resp> {
+pub fn load_config_from_file() -> Result<Config> {
     let root = home_dir().ok_or(ClientError::Config)?;
     let path = root.join(def::CONFIG_FILE);
 
@@ -72,10 +62,5 @@ pub fn load_config_from_file() -> Result<Resp> {
     if config.username.is_empty() || config.password.is_empty() || config.cookie.is_empty() {
         return Err(anyhow!(ClientError::Config));
     }
-
-    Ok(Resp::new(
-        0,
-        "load cookie success".to_string(),
-        Some(vec![Data::Config(config)]),
-    ))
+    Ok(config)
 }

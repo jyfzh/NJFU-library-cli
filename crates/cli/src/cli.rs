@@ -11,7 +11,7 @@ pub async fn handle_action(action: Action) -> Result<Resp> {
             username,
             password,
             cookie,
-        } => core::login(username, password, cookie).await,
+        } => core::login(username, password, cookie),
 
         Status { day } => core::status(day).await,
 

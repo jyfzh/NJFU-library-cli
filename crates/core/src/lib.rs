@@ -11,6 +11,7 @@ use crate::error::RespError;
 use crate::njfulib::resp::Data;
 use crate::njfulib::resp::Resp;
 use crate::njfulib::site::*;
+use crate::njfulib::user;
 use crate::utils::config::{self, Config};
 use crate::utils::handle::handle_reserve;
 use crate::utils::handle::{self, handle_status};
@@ -24,10 +25,11 @@ use futures::future::join_all;
 use std::collections::HashMap;
 use std::time::Duration;
 
-pub async fn login(username: String, password: String, cookie: String) -> Result<Resp> {
+pub fn login(username: String, password: String, cookie: String) -> Result<Resp> {
     let config = Config::new(username, password, cookie, None);
     info!("save login config to {}", def::CONFIG_FILE);
-    config::save_config_to_file(&config).await
+    config::save_config_to_file(&config)?;
+    Ok(Resp::new(0, "login success".to_owned(), None))
 }
 
 pub async fn query_by_name(day: u32, name: String, filter: Option<Vec<String>>) -> Result<Resp> {
@@ -161,12 +163,10 @@ pub async fn reserve(
 ) -> Result<Resp> {
     let start = format!("{}:00", start);
     let end = format!("{}:00", end);
-    let data = config::load_config_from_file()?.data.clone().unwrap();
-    let config = match &data[0] {
-        Data::Config(config) => config,
-        _ => panic!("load config error"),
-    };
-    let user = config.user.clone().unwrap();
+
+    let config = config::load_config_from_file()?;
+    let user = user::search_user_info(&config).await?;
+
     let appacc_no = user.accno.parse::<u32>()?;
     let filter: Vec<u32> = handle_filter(filter)?
         .into_iter()

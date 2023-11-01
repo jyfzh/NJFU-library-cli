@@ -1,5 +1,4 @@
 use crate::njfulib::floor::Floor;
-use crate::njfulib::resp::Data;
 use crate::utils::config;
 use lazy_static::lazy_static;
 
@@ -112,18 +111,7 @@ lazy_static! {
             reqwest::header::HeaderValue::from_static("private"),
         );
 
-        let data = match config::load_config_from_file() {
-            Ok(resp) => resp.data.clone().unwrap(),
-            Err(e) => {
-                eprintln!("{}", e);
-                std::process::exit(126);
-            }
-        };
-
-        let config = match &data[0] {
-            Data::Config(config) => config,
-            _ => panic!("Failed to load config from file."),
-        };
+        let config = config::load_config_from_file().unwrap();
 
         headers.insert(
             reqwest::header::COOKIE,
