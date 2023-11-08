@@ -3,6 +3,7 @@ use colored::*;
 pub fn get_color_str_from_resv_status(resv_status: u32) -> ColoredString {
     match resv_status {
         1169 => "已违约".color(Color::BrightRed).bold(),
+        1233 => "已违约".color(Color::BrightRed).bold(),
         5265 => "已违约".color(Color::BrightRed).bold(),
         1027 => "未开始".color(Color::Green).bold().italic(),
         1029 => "已开始".color(Color::Yellow).bold().blink(),
